@@ -960,7 +960,7 @@ Compare the output with the contents of `theDANE.sha256`. If the two strings mat
 
 ## Version History
 
-### 1.0.0.6
+### 1.0.0.13
 
 **New Features**
 
