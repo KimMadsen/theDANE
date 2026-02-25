@@ -1,4 +1,4 @@
-## theDANE — the Danish Advanced Native Editor
+# theDANE — the Danish Advanced Native Editor
 
 **A fast, native Windows code editor with syntax highlighting, intelligent code reformatting, and a built-in hex editor.**
 
@@ -9,13 +9,13 @@
 ## Feature Overview
 
 **Editor**
-— Syntax highlighting for 11 languages · context-aware code completion · bracket and pair matching · code folding · bookmarks (numbered and unnumbered) · multi-caret editing with distribute paste · smart double-click selection expansion · block indent/unindent · line operations (move, duplicate, join, delete, comment toggle) · find & replace with regex and Find All results panel · unlimited undo/redo · zoom
+— Syntax highlighting for 11 languages · context-aware code completion · bracket and pair matching · code folding · bookmarks (numbered and unnumbered) · multi-caret editing with distribute paste · smart double-click selection expansion · block indent/unindent · line operations (move, duplicate, join, delete, comment toggle) · find & replace with regex and Find All results panel · rich clipboard copy (HTML + RTF + plain text) · unlimited undo/redo · zoom
 
 **Code Reformatter**
-— BNF-driven reformatter for Pascal with per-rule formatting directives · token-based reformatter for SQL, XML, JSON, HTML, JavaScript, C#, and CSS · named profiles per language with import/export · full configuration editor
+— BNF-driven reformatter for Pascal with per-rule formatting directives · token-based reformatter for SQL, XML, JSON, HTML, JavaScript, C#, and CSS with per-language configuration · named profiles per language with import/export · full configuration editor
 
 **Hex Editor**
-— Dual-pane hex/ASCII view · data inspector with 24 numeric and string formats (editable) · find in hex or text · full undo/redo · pane-aware copy (hex string or text) · theming with 8 built-in style sets
+— Dual-pane hex/ASCII view · data inspector with 24 numeric and string formats (editable) · find in hex or text · full undo/redo · pane-aware copy with rich clipboard support (hex string or text, with colors in HTML/RTF) · theming with 8 built-in style sets
 
 **Theming**
 — 4 application themes (theDANE Dark, theDANE Light, Windows Dark, Windows Light) · per-language editor style sets (Visual Studio, Monokai, GitHub, Notepad++, and more) · all preferences remembered between sessions
@@ -256,6 +256,12 @@ Standard click-and-drag or Shift+Arrow selection works as expected. theDANE also
 Place additional cursors by holding `Alt` and clicking at different positions. Or create a vertical column of cursors by holding `Alt+Shift` and pressing `Up` or `Down`. Everything you type — characters, deletions, pastes — happens at all cursor positions simultaneously.
 
 **Distribute Paste**: when pasting with multiple cursors active and the clipboard contains exactly the same number of lines as there are cursors, each clipboard line is pasted to its corresponding cursor.
+
+### Copying with Formatting
+
+When you copy text from the code editor (`Ctrl+C`), theDANE places three formats on the clipboard simultaneously: plain text, HTML with inline styling, and RTF. The receiving application automatically picks the richest format it supports, so syntax-highlighted code pastes with full colors and font styles into Word, Google Docs, WordPress, Outlook, LibreOffice, and other rich-text targets. Plain-text editors like Notepad receive the unformatted text as before.
+
+The colors and styles used in the rich copy match whatever editor style set is currently active — if you are using Monokai, the pasted code will carry Monokai colors; switch to GitHub Light and the next copy will carry those colors instead.
 
 ### Line Editing
 
@@ -529,11 +535,80 @@ The full set of available directives:
 
 Set `DebugEnabled: True` in the profile to write a detailed log of every reformatter decision to a file (default `BNF_DEBUG.log` in the application folder). Useful when fine-tuning rules to understand why a construct is formatted a certain way.
 
+### Token-Based Reformatter: Configuration Reference
+
+The token-based reformatter is used by SQL, XML, JSON, HTML, JavaScript, C#, and CSS. Each language has a set of common settings shared across all token reformatters, plus language-specific options.
+
+#### Common Settings (All Token-Based Languages)
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `IndentSize` | Spaces per indent level | 2 |
+| `UseTabs` | Use tab characters instead of spaces | False |
+| `KeywordCase` | Keyword casing: 0=No change, 1=UPPER, 2=lower, 3=Capitalize | Varies per language |
+
+#### SQL Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `KeywordCase` | Casing for SQL keywords (SELECT, FROM, WHERE, etc.): 0=No change, 1=UPPER, 2=lower, 3=Capitalize | 1 (UPPER) |
+| `IdentifierCase` | Casing for table and column names: 0=No change, 1=UPPER, 2=lower, 3=Capitalize | 0 (No change) |
+| `BreakOnJoin` | Start a new line before JOIN clauses | True |
+| `BreakOnAndOr` | Start a new line before AND/OR in WHERE clauses | True |
+| `BreakOnOn` | Start a new line before ON in JOIN conditions | False |
+| `BreakBeforeComma` | Place commas at the start of lines (leading-comma style) instead of at the end | False |
+| `SmartParens` | Avoid line breaks inside function-call parentheses | True |
+
+#### XML Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `AttributesOnNewLine` | Place each attribute on its own line | False |
+| `SpaceBeforeSelfClose` | Add a space before `/>` in self-closing tags | True |
+| `CloseTagOnNewLine` | Place closing tags on a new line | False |
+| `IndentContent` | Indent element content inside parent tags | True |
+| `IndentAttributes` | Indent attributes when placed on new lines | True |
+| `AttributeIndentSize` | Spaces to indent attributes (overrides IndentSize for attributes) | 4 |
+
+#### JSON Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `Compact` | Remove all non-essential whitespace (minify) | False |
+
+#### HTML Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `BreakAttributes` | Place each attribute on its own line | False |
+
+#### JavaScript Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `BraceOnNewLine` | Place opening braces on a new line (Allman style) instead of same line (K&R style) | False |
+| `SpaceBeforeParen` | Add a space before parentheses in control structures (`if (` vs `if(`) | True |
+
+#### C# Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `BraceOnNewLine` | Place opening braces on a new line (Allman style, standard for C#) | True |
+
+#### CSS Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `BraceOnNewLine` | Place opening brace on a new line | True |
+| `IndentProperties` | Indent property declarations inside rule blocks | True |
+
+All these settings can be edited through the profile settings editor (the **⚙ button** in the toolbar, or **Format → Profiles → Edit Profile Settings**). Changes are stored in the active profile's `.cfg` file and take effect immediately on the next reformat.
+
 ---
 
 ## Reformatter Profiles
 
-Profiles let you save and switch between different formatting configurations. Each language has its own independent set of profiles.
+Profiles let you save and switch between different formatting configurations. Each language has its own independent set of profiles. Reformatter profiles are available for Pascal, SQL, XML, JSON, HTML, JavaScript, C#, and CSS. Languages without a reformatter (Markdown, Key/Value) do not appear in the profile system.
 
 ### Creating and Managing Profiles
 
@@ -616,6 +691,8 @@ The right-click context menu adapts based on which pane your cursor is in:
 |-------------|--------------------|--------------------|
 | **ASCII pane** | Printable text | Copy as Hex |
 | **Hex pane** | Hex string (e.g. `4B 42 4D`) | Copy as Text |
+
+When copying from the hex pane, theDANE places rich clipboard formats (HTML + RTF) alongside the plain text, so pasting into Word or other rich-text applications preserves the hex dump layout with byte-class coloring — null bytes, ASCII printables, high bytes, and region highlights all retain their colors from the active style set.
 
 ### Data Inspector
 
@@ -881,6 +958,37 @@ Compare the output with the contents of `theDANE.sha256`. If the two strings mat
 
 ---
 
+## Version History
+
+### 1.0.0.6
+
+**New Features**
+
+- Rich clipboard copy — `Ctrl+C` in the code editor now places HTML and RTF alongside plain text, so syntax-highlighted code pastes with full colors into Word, Google Docs, WordPress, Outlook, and other rich-text applications
+- Rich clipboard copy in the hex editor — copying from the hex pane produces a colored hex dump with address, hex bytes, and ASCII sidebar
+- SQL reformatter keyword casing — new `KeywordCase` setting with four modes (no change, UPPER, lower, Capitalize), replacing the old boolean toggle
+- SQL reformatter identifier casing — new `IdentifierCase` setting to control casing of table and column names independently from keywords
+- SQL reformatter conditional AND/OR breaks — `BreakOnAndOr` setting now controls whether AND/OR in WHERE clauses start a new line
+- CSS reformatter conditional property indentation — `IndentProperties` setting now controls whether properties inside rule blocks are indented
+- Full token-based reformatter configuration reference added to this documentation
+
+**Bug Fixes**
+
+- Fixed Pascal reformatter losing its BNF configuration when switching profiles
+- Fixed SQL highlighter not recognizing CHARACTER SET as a compound keyword
+- Fixed reformatter adding an extra blank line at the end of the document on each reformat
+- Fixed crash (index out of bounds) when using backspace or delete across lines in certain editing scenarios
+- Fixed crash when opening profile settings for Markdown or Key/Value languages
+- Fixed "seasick" text rendering where characters could appear vertically misaligned with certain style sets
+- Fixed reformatter profile save/load writing duplicate entries for base settings
+- Fixed several SQL and CSS reformatter settings that were defined but had no effect
+
+### 1.0.0.5
+
+Initial public release.
+
+---
+
 ## Advanced: Under the Hood
 
 This section is for those curious about the technology and architecture behind theDANE.
@@ -921,6 +1029,7 @@ The editing engine, syntax highlighters, and reformatter are provided by the **k
 | `kbmSyntaxHighlighterReformatter` | The BNF-driven and token-based reformatter engines |
 | `kbmSyntaxHighlighterReformatterProfiles` | Profile management (load, save, import, export, clone) |
 | `kbmSyntaxHighlighterReformatterSettings` | Reformatter settings editor UI and style sets |
+| `kbmRichClipboard` | Rich clipboard builder — generates CF_HTML, CF_RTF, and CF_UNICODETEXT for syntax-colored copy |
 
 ### Application Units
 
